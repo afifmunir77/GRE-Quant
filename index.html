@@ -4,157 +4,218 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GRE Quant Practice</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Inter', sans-serif; /* Using Inter font as requested */
             margin: 20px;
             background-color: #f4f4f4;
             color: #333;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #0056b3;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.2em;
         }
         .question-container {
             background-color: #fff;
             padding: 25px;
             margin-bottom: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 12px; /* Rounded corners */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
         }
         .question-text {
-            font-size: 1.1em;
-            margin-bottom: 20px;
-            line-height: 1.6;
+            font-size: 1.15em;
+            margin-bottom: 25px;
+            font-weight: 500;
         }
         .options label {
             display: block;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             font-size: 1em;
             cursor: pointer;
+            padding: 8px 10px;
+            border-radius: 8px;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .options label:hover {
+            background-color: #e0f7fa;
+            color: #007bff;
         }
         .options input[type="radio"] {
-            margin-right: 10px;
+            margin-right: 12px;
+            transform: scale(1.1);
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: background-color 0.2s, transform 0.1s;
+            background-color: #007bff;
+            color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        button:hover {
+            background-color: #0056b3;
+            transform: translateY(-1px);
+        }
+        button:active {
+            transform: translateY(0);
         }
         .answer-feedback {
-            margin-top: 15px;
+            margin-top: 20px;
             font-weight: bold;
+            font-size: 1.1em;
+            text-align: center;
+            padding: 10px;
+            border-radius: 8px;
         }
         .correct {
-            color: green;
+            color: #28a745;
+            background-color: #e6ffe6;
         }
         .incorrect {
-            color: red;
+            color: #dc3545;
+            background-color: #ffe6e6;
         }
         .timer-section {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #e9e9e9;
-            border-radius: 5px;
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f0f8ff;
+            border-radius: 10px;
             display: flex;
+            flex-direction: column; /* Stack elements vertically on small screens */
             align-items: center;
             gap: 15px;
-            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        @media (min-width: 600px) {
+            .timer-section {
+                flex-direction: row; /* Horizontal layout on larger screens */
+                justify-content: center;
+            }
         }
         .timer-display {
-            font-size: 1.2em;
+            font-size: 1.8em;
             font-weight: bold;
-            min-width: 90px;
+            min-width: 120px;
             text-align: center;
+            padding: 5px 10px;
+            border: 2px solid #a7d9ff;
+            border-radius: 8px;
+            background-color: #ffffff;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
         }
         .negative-time {
             color: red;
         }
         .timer-buttons button {
-            padding: 8px 15px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.9em;
-            transition: background-color 0.2s;
+            padding: 10px 18px;
+            margin: 0 5px;
+            border-radius: 8px;
+            font-size: 0.95em;
         }
         .timer-buttons button.start-btn {
             background-color: #28a745;
-            color: white;
         }
         .timer-buttons button.start-btn:hover {
             background-color: #218838;
         }
         .timer-buttons button.stop-btn {
             background-color: #dc3545;
-            color: white;
         }
         .timer-buttons button.stop-btn:hover {
             background-color: #c82333;
         }
         .timer-buttons button.reset-btn {
-            background-color: #007bff;
-            color: white;
+            background-color: #6c757d;
         }
         .timer-buttons button.reset-btn:hover {
-            background-color: #0056b3;
+            background-color: #5a6268;
         }
         .timer-type-toggle {
             display: flex;
-            border-radius: 5px;
+            border-radius: 8px;
             overflow: hidden;
+            border: 1px solid #007bff;
         }
         .timer-type-toggle button {
             padding: 8px 15px;
-            border: 1px solid #007bff;
+            border: none; /* Individual button borders removed, handled by container */
             background-color: white;
             color: #007bff;
             cursor: pointer;
             font-size: 0.9em;
-            border-radius: 0; /* Remove individual button border-radius */
-        }
-        .timer-type-toggle button:first-child {
-            border-top-left-radius: 5px;
-            border-bottom-left-radius: 5px;
-        }
-        .timer-type-toggle button:last-child {
-            border-top-right-radius: 5px;
-            border-bottom-right-radius: 5px;
-            border-left: none; /* Remove duplicate border */
+            border-radius: 0;
+            transition: background-color 0.2s, color 0.2s;
+            box-shadow: none; /* Remove individual button shadow */
         }
         .timer-type-toggle button.active {
             background-color: #007bff;
             color: white;
         }
+        .timer-type-toggle button:hover:not(.active) {
+            background-color: #e0f7fa;
+        }
         .timer-input-group {
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 8px;
+            font-size: 1em;
+            color: #555;
         }
         .timer-input-group input {
-            width: 60px;
-            padding: 5px;
-            border-radius: 4px;
+            width: 50px;
+            padding: 8px;
+            border-radius: 6px;
             border: 1px solid #ccc;
+            text-align: center;
+            font-size: 1em;
         }
         .progress-section {
             margin-top: 40px;
-            padding: 20px;
+            padding: 25px;
             background-color: #e0f7fa;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
         }
         .progress-section h3 {
             margin-top: 0;
             color: #007bff;
+            font-size: 1.8em;
+            text-align: center;
+            margin-bottom: 20px;
         }
         .progress-item {
             margin-bottom: 10px;
-            padding-bottom: 5px;
+            padding: 10px 0;
             border-bottom: 1px dashed #b3e5fc;
+            font-size: 0.95em;
         }
         .progress-item:last-child {
             border-bottom: none;
         }
-        .progress-item span {
-            font-weight: bold;
+        .progress-item strong {
+            color: #0056b3;
         }
         .progress-item .time-taken {
             color: #28a745;
+            font-weight: bold;
         }
         .progress-item .negative-time-taken {
             color: #dc3545;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -163,68 +224,95 @@
     <h1>GRE Quant Practice Questions</h1>
 
     <div id="questions-container">
-        <div class="question-container" id="question1">
-            <div class="question-text">
-                <p>Liam is 5 years older than Olivia. In 3 years, Liam will be twice as old as Olivia. How old is Olivia now?</p>
-            </div>
-            <div class="options">
-                <label>
-                    <input type="radio" name="q1_option" value="A"> A) 2
-                </label>
-                <label>
-                    <input type="radio" name="q1_option" value="B"> B) 7
-                </label>
-                <label>
-                    <input type="radio" name="q1_option" value="C"> C) 8
-                </label>
-                <label>
-                    <input type="radio" name="q1_option" value="D"> D) 10
-                </label>
-                <label>
-                    <input type="radio" name="q1_option" value="E"> E) 12
-                </label>
-            </div>
-            <button onclick="checkAnswer('question1', 'A')">Check Answer</button>
-            <div class="answer-feedback" id="feedback-question1"></div>
-
-            <div class="timer-section">
-                <div class="timer-type-toggle">
-                    <button id="toggle-stopwatch-q1" class="active" onclick="toggleTimerType('question1', 'stopwatch')">Stopwatch</button>
-                    <button id="toggle-timer-q1" onclick="toggleTimerType('question1', 'timer')">Timer</button>
-                </div>
-                <div class="timer-input-group" id="timer-input-q1" style="display: none;">
-                    <input type="number" id="timer-minutes-q1" value="1" min="0"> min
-                    <input type="number" id="timer-seconds-q1" value="0" min="0" max="59"> sec
-                </div>
-                <div class="timer-display" id="timer-display-question1">00:00</div>
-                <div class="timer-buttons">
-                    <button class="start-btn" onclick="startTimer('question1')">Start</button>
-                    <button class="stop-btn" onclick="stopTimer('question1')">Stop</button>
-                    <button class="reset-btn" onclick="resetTimer('question1')">Reset</button>
-                </div>
-            </div>
-        </div>
+        <!-- Questions will be dynamically loaded here by JavaScript -->
     </div>
 
     <div class="progress-section">
         <h3>Your Progress</h3>
         <div id="progress-list">
-            </div>
+            <!-- Progress items will be loaded here from local storage -->
+        </div>
     </div>
 
     <script>
+        // Array to hold all questions and their correct answers
+        const allQuestions = [
+            {
+                id: 'question1',
+                text: 'Liam is 5 years older than Olivia. In 3 years, Liam will be twice as old as Olivia. How old is Olivia now?',
+                options: {
+                    A: '2',
+                    B: '7',
+                    C: '8',
+                    D: '10',
+                    E: '12'
+                },
+                correctAnswer: 'A' // Correct answer for question1
+            }
+            // Add more questions here as objects
+        ];
+
         const timers = {}; // Stores the current time for each timer (in seconds)
         const timerIntervals = {}; // Stores the setInterval ID for each timer
         const timerTypes = {}; // Stores the type ('stopwatch' or 'timer') for each question
         const timerSetTimes = {}; // Stores the *initial* set time for 'timer' type countdown
 
+        // Function to render questions dynamically
+        function renderQuestions() {
+            const container = document.getElementById('questions-container');
+            container.innerHTML = ''; // Clear existing content
+
+            allQuestions.forEach(q => {
+                let optionsHtml = '';
+                for (const key in q.options) {
+                    optionsHtml += `
+                        <label>
+                            <input type="radio" name="${q.id}_option" value="${key}"> ${key}) ${q.options[key]}
+                        </label>
+                    `;
+                }
+
+                container.innerHTML += `
+                    <div class="question-container" id="${q.id}">
+                        <div class="question-text">
+                            <p>${q.text}</p>
+                        </div>
+                        <div class="options">
+                            ${optionsHtml}
+                        </div>
+                        <button onclick="checkAnswer('${q.id}', '${q.correctAnswer}')">Check Answer</button>
+                        <div class="answer-feedback" id="feedback-${q.id}"></div>
+
+                        <div class="timer-section">
+                            <div class="timer-type-toggle">
+                                <button id="toggle-stopwatch-${q.id}" class="active" onclick="toggleTimerType('${q.id}', 'stopwatch')">Stopwatch</button>
+                                <button id="toggle-timer-${q.id}" onclick="toggleTimerType('${q.id}', 'timer')">Timer</button>
+                            </div>
+                            <div class="timer-input-group" id="timer-input-${q.id}" style="display: none;">
+                                <input type="number" id="timer-minutes-${q.id}" value="1" min="0"> min
+                                <input type="number" id="timer-seconds-${q.id}" value="0" min="0" max="59"> sec
+                            </div>
+                            <div class="timer-display" id="timer-display-${q.id}">00:00</div>
+                            <div class="timer-buttons">
+                                <button class="start-btn" onclick="startTimer('${q.id}')">Start</button>
+                                <button class="stop-btn" onclick="stopTimer('${q.id}')">Stop</button>
+                                <button class="reset-btn" onclick="resetTimer('${q.id}')">Reset</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
         // Load progress from local storage when the page loads
         document.addEventListener('DOMContentLoaded', () => {
-            loadProgress();
-            // Initialize timer types for all existing questions to stopwatch
+            renderQuestions(); // FIRST: Render all questions
+            loadProgress(); // THEN: Load progress (depends on questions existing)
+
+            // FINALLY: Initialize timer types for all questions that have been rendered
             document.querySelectorAll('.question-container').forEach(q => {
                 const questionId = q.id;
-                toggleTimerType(questionId, 'stopwatch');
+                toggleTimerType(questionId, 'stopwatch'); // Default to stopwatch on load
             });
         });
 
@@ -256,6 +344,12 @@
             const timerInput = document.getElementById(`timer-input-${questionId}`);
             const timerDisplay = document.getElementById(`timer-display-${questionId}`);
 
+            // Ensure elements exist before trying to manipulate them
+            if (!stopwatchBtn || !timerBtn || !timerInput || !timerDisplay) {
+                console.error(`Elements for ${questionId} not found during toggleTimerType.`);
+                return;
+            }
+
             stopTimer(questionId); // Stop any running timer when changing type
             resetTimer(questionId); // Reset the timer display and value
 
@@ -269,8 +363,10 @@
                 stopwatchBtn.classList.remove('active');
                 timerInput.style.display = 'flex';
                 // Set initial display based on input values
-                const minutes = parseInt(document.getElementById(`timer-minutes-${questionId}`).value || 0);
-                const seconds = parseInt(document.getElementById(`timer-seconds-${questionId}`).value || 0);
+                const minutesInput = document.getElementById(`timer-minutes-${questionId}`);
+                const secondsInput = document.getElementById(`timer-seconds-${questionId}`);
+                const minutes = parseInt(minutesInput.value || 0);
+                const seconds = parseInt(secondsInput.value || 0);
                 const totalSeconds = minutes * 60 + seconds;
                 timerSetTimes[questionId] = totalSeconds; // Store for calculating time taken
                 timers[questionId] = totalSeconds; // Set current timer value
@@ -282,26 +378,32 @@
             if (timerIntervals[questionId]) return; // Timer already running
 
             const timerDisplay = document.getElementById(`timer-display-${questionId}`);
+            if (!timerDisplay) {
+                console.error(`Timer display for ${questionId} not found.`);
+                return;
+            }
             timerDisplay.classList.remove('negative-time');
 
-            if (!timerTypes[questionId]) { // Should ideally be set by toggleTimerType on load, but as a fallback
-                timerTypes[questionId] = 'stopwatch';
-                toggleTimerType(questionId, 'stopwatch'); // Ensure UI is consistent
+            // Ensure timer type is set, default to stopwatch if not
+            if (!timerTypes[questionId]) {
+                toggleTimerType(questionId, 'stopwatch');
             }
 
             if (timerTypes[questionId] === 'stopwatch') {
                 if (timers[questionId] === undefined) {
-                    timers[questionId] = 0; // Initialize stopwatch at 0
+                    timers[questionId] = 0; // Initialize stopwatch at 0 if not already
                 }
                 timerIntervals[questionId] = setInterval(() => {
                     timers[questionId]++;
                     timerDisplay.textContent = formatTime(timers[questionId]);
                 }, 1000);
             } else { // Timer mode
-                // Ensure timers[questionId] is correctly set from input on start
+                // If timer is being started for the first time or after a reset/stop
                 if (timers[questionId] === undefined || timerIntervals[questionId] === null) {
-                    const minutes = parseInt(document.getElementById(`timer-minutes-${questionId}`).value || 0);
-                    const seconds = parseInt(document.getElementById(`timer-seconds-${questionId}`).value || 0);
+                    const minutesInput = document.getElementById(`timer-minutes-${questionId}`);
+                    const secondsInput = document.getElementById(`timer-seconds-${questionId}`);
+                    const minutes = parseInt(minutesInput.value || 0);
+                    const seconds = parseInt(secondsInput.value || 0);
                     timers[questionId] = minutes * 60 + seconds;
                     timerSetTimes[questionId] = timers[questionId]; // Capture initial set time
                 }
@@ -328,14 +430,20 @@
         function resetTimer(questionId) {
             stopTimer(questionId);
             const timerDisplay = document.getElementById(`timer-display-${questionId}`);
+            if (!timerDisplay) {
+                console.error(`Timer display for ${questionId} not found during reset.`);
+                return;
+            }
             timerDisplay.classList.remove('negative-time');
 
             if (timerTypes[questionId] === 'stopwatch') {
                 timers[questionId] = 0;
                 timerDisplay.textContent = "00:00";
             } else { // Timer mode
-                const minutes = parseInt(document.getElementById(`timer-minutes-${questionId}`).value || 0);
-                const seconds = parseInt(document.getElementById(`timer-seconds-${questionId}`).value || 0);
+                const minutesInput = document.getElementById(`timer-minutes-${questionId}`);
+                const secondsInput = document.getElementById(`timer-seconds-${questionId}`);
+                const minutes = parseInt(minutesInput.value || 0);
+                const seconds = parseInt(secondsInput.value || 0);
                 timers[questionId] = minutes * 60 + seconds;
                 timerSetTimes[questionId] = timers[questionId]; // Reset the initial set time as well
                 timerDisplay.textContent = formatTime(timers[questionId]);
@@ -361,12 +469,13 @@
                     formattedTimeDisplay = formatTime(timeTakenSeconds);
                     timeTypeString = 'stopwatch';
                 } else if (timerTypes[questionId] === 'timer') {
-                    if (timers[questionId] <= 0) { // If timer ran out or went negative
-                        timeTakenSeconds = timerSetTimes[questionId] - timers[questionId]; // Time from start until now (past zero)
+                    // Calculate time taken relative to the initial set time
+                    timeTakenSeconds = timerSetTimes[questionId] - timers[questionId];
+
+                    if (timers[questionId] < 0) { // If timer ran out and went negative
                         formattedTimeDisplay = "-" + formatTime(Math.abs(timers[questionId]));
                         timeTypeString = 'timer-negative';
-                    } else { // If timer is still positive
-                        timeTakenSeconds = timerSetTimes[questionId] - timers[questionId]; // Time elapsed
+                    } else { // If timer is still positive or exactly zero
                         formattedTimeDisplay = formatTime(timeTakenSeconds);
                         timeTypeString = 'timer-positive';
                     }
