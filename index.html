@@ -50,6 +50,7 @@
             display: flex;
             align-items: center;
             gap: 15px;
+            flex-wrap: wrap; /* Allow wrapping on smaller screens */
         }
         .timer-display {
             font-size: 1.2em;
@@ -89,22 +90,32 @@
         .timer-buttons button.reset-btn:hover {
             background-color: #0056b3;
         }
+        .timer-type-toggle {
+            display: flex;
+            border-radius: 5px;
+            overflow: hidden;
+        }
         .timer-type-toggle button {
             padding: 8px 15px;
             border: 1px solid #007bff;
-            border-radius: 5px;
-            background-color: #007bff;
-            color: white;
+            background-color: white;
+            color: #007bff;
             cursor: pointer;
             font-size: 0.9em;
+            border-radius: 0; /* Remove individual button border-radius */
+        }
+        .timer-type-toggle button:first-child {
+            border-top-left-radius: 5px;
+            border-bottom-left-radius: 5px;
+        }
+        .timer-type-toggle button:last-child {
+            border-top-right-radius: 5px;
+            border-bottom-right-radius: 5px;
+            border-left: none; /* Remove duplicate border */
         }
         .timer-type-toggle button.active {
-            background-color: #0056b3;
-            border-color: #0056b3;
-        }
-        .timer-type-toggle button:hover {
-            background-color: #0056b3;
-            border-color: #0056b3;
+            background-color: #007bff;
+            color: white;
         }
         .timer-input-group {
             display: flex;
@@ -202,13 +213,20 @@
     </div>
 
     <script>
-        const timers = {};
-        const timerIntervals = {};
-        const timerTypes = {}; // 'stopwatch' or 'timer'
-        const timerSetTimes = {}; // Stores the initial set time for timers
+        const timers = {}; // Stores the current time for each timer (in seconds)
+        const timerIntervals = {}; // Stores the setInterval ID for each timer
+        const timerTypes = {}; // Stores the type ('stopwatch' or 'timer') for each question
+        const timerSetTimes = {}; // Stores the *initial* set time for 'timer' type countdown
 
-        // Load progress from local storage
-        document.addEventListener('DOMContentLoaded', loadProgress);
+        // Load progress from local storage when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            loadProgress();
+            // Initialize timer types for all existing questions to stopwatch
+            document.querySelectorAll('.question-container').forEach(q => {
+                const questionId = q.id;
+                toggleTimerType(questionId, 'stopwatch');
+            });
+        });
 
         function checkAnswer(questionId, correctAnswer) {
             const options = document.querySelectorAll(`#${questionId} input[name="${questionId}_option"]`);
@@ -239,22 +257,23 @@
             const timerDisplay = document.getElementById(`timer-display-${questionId}`);
 
             stopTimer(questionId); // Stop any running timer when changing type
-            resetTimer(questionId); // Reset the timer display
+            resetTimer(questionId); // Reset the timer display and value
 
             if (type === 'stopwatch') {
                 stopwatchBtn.classList.add('active');
                 timerBtn.classList.remove('active');
                 timerInput.style.display = 'none';
                 timerDisplay.classList.remove('negative-time'); // Ensure no red color for stopwatch
-            } else {
+            } else { // Timer mode
                 timerBtn.classList.add('active');
                 stopwatchBtn.classList.remove('active');
                 timerInput.style.display = 'flex';
-                // Reset to default timer display when switching to timer mode
+                // Set initial display based on input values
                 const minutes = parseInt(document.getElementById(`timer-minutes-${questionId}`).value || 0);
                 const seconds = parseInt(document.getElementById(`timer-seconds-${questionId}`).value || 0);
                 const totalSeconds = minutes * 60 + seconds;
-                timerSetTimes[questionId] = totalSeconds; // Store initial set time
+                timerSetTimes[questionId] = totalSeconds; // Store for calculating time taken
+                timers[questionId] = totalSeconds; // Set current timer value
                 timerDisplay.textContent = formatTime(totalSeconds);
             }
         }
@@ -265,8 +284,9 @@
             const timerDisplay = document.getElementById(`timer-display-${questionId}`);
             timerDisplay.classList.remove('negative-time');
 
-            if (!timerTypes[questionId]) {
-                timerTypes[questionId] = 'stopwatch'; // Default to stopwatch if not set
+            if (!timerTypes[questionId]) { // Should ideally be set by toggleTimerType on load, but as a fallback
+                timerTypes[questionId] = 'stopwatch';
+                toggleTimerType(questionId, 'stopwatch'); // Ensure UI is consistent
             }
 
             if (timerTypes[questionId] === 'stopwatch') {
@@ -278,12 +298,12 @@
                     timerDisplay.textContent = formatTime(timers[questionId]);
                 }, 1000);
             } else { // Timer mode
-                let minutes = parseInt(document.getElementById(`timer-minutes-${questionId}`).value || 0);
-                let seconds = parseInt(document.getElementById(`timer-seconds-${questionId}`).value || 0);
-
-                if (timers[questionId] === undefined || timers[questionId] === 0) { // If timer just started or reset
-                    timers[questionId] = minutes * 60 + seconds; // Initialize timer with set time
-                    timerSetTimes[questionId] = timers[questionId]; // Store for reset
+                // Ensure timers[questionId] is correctly set from input on start
+                if (timers[questionId] === undefined || timerIntervals[questionId] === null) {
+                    const minutes = parseInt(document.getElementById(`timer-minutes-${questionId}`).value || 0);
+                    const seconds = parseInt(document.getElementById(`timer-seconds-${questionId}`).value || 0);
+                    timers[questionId] = minutes * 60 + seconds;
+                    timerSetTimes[questionId] = timers[questionId]; // Capture initial set time
                 }
 
                 timerIntervals[questionId] = setInterval(() => {
@@ -302,7 +322,7 @@
 
         function stopTimer(questionId) {
             clearInterval(timerIntervals[questionId]);
-            timerIntervals[questionId] = null;
+            timerIntervals[questionId] = null; // Clear the interval ID
         }
 
         function resetTimer(questionId) {
@@ -317,6 +337,7 @@
                 const minutes = parseInt(document.getElementById(`timer-minutes-${questionId}`).value || 0);
                 const seconds = parseInt(document.getElementById(`timer-seconds-${questionId}`).value || 0);
                 timers[questionId] = minutes * 60 + seconds;
+                timerSetTimes[questionId] = timers[questionId]; // Reset the initial set time as well
                 timerDisplay.textContent = formatTime(timers[questionId]);
             }
         }
@@ -330,23 +351,24 @@
 
         function saveProgress(questionId, isCorrect) {
             const progress = JSON.parse(localStorage.getItem('greQuantProgress')) || [];
-            let timeTaken = 0;
-            let timeType = 'stopwatch'; // 'stopwatch' or 'timer'
-            let timeInfo = '';
+            let timeTakenSeconds = 0;
+            let timeTypeString = 'N/A'; // Default
+            let formattedTimeDisplay = 'N/A';
 
             if (timers[questionId] !== undefined) {
                 if (timerTypes[questionId] === 'stopwatch') {
-                    timeTaken = timers[questionId];
-                    timeInfo = formatTime(timeTaken);
-                    timeType = 'stopwatch';
-                } else { // Timer mode
-                    timeTaken = timerSetTimes[questionId] - timers[questionId]; // Time from start of timer or until it went negative
-                    timeInfo = formatTime(timeTaken);
-                    timeType = 'timer';
-
-                    if (timers[questionId] < 0) {
-                        timeInfo = "-" + formatTime(Math.abs(timers[questionId]));
-                        timeType = 'timer-negative'; // Special type for negative time
+                    timeTakenSeconds = timers[questionId];
+                    formattedTimeDisplay = formatTime(timeTakenSeconds);
+                    timeTypeString = 'stopwatch';
+                } else if (timerTypes[questionId] === 'timer') {
+                    if (timers[questionId] <= 0) { // If timer ran out or went negative
+                        timeTakenSeconds = timerSetTimes[questionId] - timers[questionId]; // Time from start until now (past zero)
+                        formattedTimeDisplay = "-" + formatTime(Math.abs(timers[questionId]));
+                        timeTypeString = 'timer-negative';
+                    } else { // If timer is still positive
+                        timeTakenSeconds = timerSetTimes[questionId] - timers[questionId]; // Time elapsed
+                        formattedTimeDisplay = formatTime(timeTakenSeconds);
+                        timeTypeString = 'timer-positive';
                     }
                 }
             }
@@ -356,9 +378,9 @@
                 questionId: questionId,
                 isCorrect: isCorrect,
                 timestamp: new Date().toLocaleString(),
-                timeTaken: timeTaken,
-                formattedTime: timeInfo,
-                timeType: timeType
+                timeTakenSeconds: timeTakenSeconds, // Store raw seconds for potential analysis
+                formattedTime: formattedTimeDisplay,
+                timeType: timeTypeString
             };
 
             if (existingIndex > -1) {
@@ -380,30 +402,15 @@
                 const p = document.createElement('p');
                 p.className = 'progress-item';
                 let status = item.isCorrect ? 'Correct' : 'Incorrect';
-                let timeClass = '';
-                if (item.timeType === 'stopwatch') {
-                    timeClass = 'time-taken';
-                } else if (item.timeType === 'timer') {
-                    timeClass = 'time-taken'; // Positive time for timer
-                } else if (item.timeType === 'timer-negative') {
-                    timeClass = 'negative-time-taken'; // Negative time for timer
+                let timeClass = 'time-taken'; // Default to green
+                if (item.timeType === 'timer-negative') {
+                    timeClass = 'negative-time-taken'; // Red for negative timer
                 }
-
 
                 p.innerHTML = `<strong>${item.questionId}:</strong> ${status} - Time: <span class="${timeClass}">${item.formattedTime || 'N/A'}</span> (Attempted: ${item.timestamp})`;
                 progressList.appendChild(p);
             });
         }
-
-        // Initialize timer types for existing questions
-        document.addEventListener('DOMContentLoaded', () => {
-            const questionElements = document.querySelectorAll('.question-container');
-            questionElements.forEach(q => {
-                const questionId = q.id;
-                toggleTimerType(questionId, 'stopwatch'); // Default to stopwatch on load
-            });
-        });
-
     </script>
 
 </body>
